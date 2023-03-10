@@ -1,0 +1,39 @@
+# Import required libraries
+import pandas as pd
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+
+# Load the dataset
+data = pd.read_csv('steel_pipe_data.csv')
+
+# Split the data into training and testing sets
+train_data = data.sample(frac=0.8, random_state=0)
+test_data = data.drop(train_data.index)
+
+# Separate the features (input variables) and labels (output variables)
+train_features = train_data.drop(columns=['diameter', 'thickness'])
+train_labels = train_data[['diameter', 'thickness']]
+
+test_features = test_data.drop(columns=['diameter', 'thickness'])
+test_labels = test_data[['diameter', 'thickness']]
+
+# Define the model architecture
+model = keras.Sequential([
+    keras.layers.Dense(64, activation='relu', input_shape=[len(train_features.keys())]),
+    keras.layers.Dense(64, activation='relu'),
+    keras.layers.Dense(2)
+])
+
+# Compile the model
+model.compile(loss='mse', optimizer=tf.keras.optimizers.RMSprop(0.001), metrics=['mae', 'mse'])
+
+# Train the model
+history = model.fit(train_features, train_labels, epochs=100, validation_split=0.2, verbose=0)
+
+# Evaluate the model on the test set
+test_loss, test_mae, test_mse = model.evaluate(test_features, test_labels, verbose=2)
+
+# Print the model's performance metrics
+print('Mean Absolute Error:', test_mae)
+print('Mean Squared Error:', test_mse)
