@@ -1,0 +1,27 @@
+import tensorflow as tf
+import pandas as pd
+import numpy as np
+
+data = pd.read_csv('steel_pipe_dimensions.csv')
+
+train_data = data[:800]
+test_data = data[800:]
+
+X_train = train_data.drop(['diameter', 'length'], axis=1)
+Y_train = train_data[['diameter', 'length']]
+
+X_test = test_data.drop(['diameter', 'length'], axis=1)
+Y_test = test_data[['diameter', 'length']]
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(32, activation='relu', input_shape=(3,)),
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dense(2)
+])
+
+model.compile(optimizer='adam', loss='mean_squared_error')
+
+history = model.fit(X_train, Y_train, epochs=100, batch_size=32, validation_data=(X_test, Y_test))
+
+loss = model.evaluate(X_test, Y_test)
+print('Loss:', loss)
